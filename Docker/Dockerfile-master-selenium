@@ -1,0 +1,15 @@
+FROM docker-registry.default.svc:5000/sandbox-continuous-testing/jmeter-base-ikea:latest
+#FROM ikea/jmeter-base-ikea:latest
+# For local build from base image - FROM ikea/jmeter-base-ikea:latest
+# SET VARIABLE $PROJECT to your project!!
+
+MAINTAINER jens.pettersson
+
+ARG JMETER_VERSION=5.3
+
+ADD Docker/lib/ $JMETER_HOME/lib
+ADD Docker/lib/ext $JMETER_HOME/lib/ext
+
+WORKDIR $JMETER_HOME/bin
+	
+EXPOSE 60000

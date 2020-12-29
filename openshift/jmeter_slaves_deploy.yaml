@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jmeter-slaves
+  labels:
+    jmeter_mode: slave
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      jmeter_mode: slave
+  template:
+    metadata:
+      labels:
+        jmeter_mode: slave
+    spec:
+      containers:
+      - name: jmslave
+        image: docker-registry.default.svc:5000/sandbox-continuous-testing/jmeter-slave-ikea
+        imagePullPolicy: Always
+        resources:
+          limits:
+            memory: "2Gi"
+            cpu: "2"
+          requests:
+            memory: "500Mi"
+            cpu: "250m"
+        volumeMounts:
+        - name: csv
+          mountPath: /test
+        ports:
+        - containerPort: 1099
+        - containerPort: 50000
+        envFrom: 
+        - configMapRef:
+            name:  env-variables
+      volumes:
+      - name: csv
+        configMap:
+         name: csv-data

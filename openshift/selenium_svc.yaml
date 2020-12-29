@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: selenium-standalone
+  labels:
+    app: selenium-standalone
+spec:
+  type: NodePort
+  ports:
+    - name: tcp-4444
+      protocol: TCP
+      port: 4444
+      targetPort: 4444
+    - name: tcp-5900
+      protocol: TCP
+      port: 5900
+      targetPort: 5900
+  selector:
+    app: selenium-standalone

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment # for versions before 1.9.0 use apps/v1beta2
+metadata:
+  name: jmeter-master
+  labels:
+    jmeter_mode: master
+    app: jmeter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      jmeter_mode: master
+  template:
+    metadata:
+      labels:
+        jmeter_mode: master
+    spec:
+      containers:
+      - name: jmmaster
+        image: docker-registry.default.svc:5000/sandbox-continuous-testing/jmeter-master-ikea
+        imagePullPolicy: Always
+        envFrom:
+        - configMapRef:
+            name: env-variables
+        command: [ "/bin/bash", "-c", "--" ]
+        args: [ "while true; do sleep 30; done;" ]
+        volumeMounts:
+        - name: loadtest
+          mountPath: /testdata/loadtest/load_test
+          subPath: "load_test"
+        - name: csv
+          mountPath: /testdata/test
+        ports:
+        - containerPort: 60000
+      volumes:
+      - name: loadtest
+        configMap:
+         name: jmeter-load-test
+         defaultMode: 0777
+      - name: csv
+        configMap:
+         name: csv-data
+         readOnly: false

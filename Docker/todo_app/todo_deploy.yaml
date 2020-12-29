@@ -1,0 +1,31 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: todo-backend
+  labels:
+    app: todo-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-backend
+  template:
+    metadata:
+      labels:
+        app: todo-backend
+    spec:
+      containers:
+      - name: todo
+        image: docker-registry.default.svc:5000/sandbox-continuous-testing/todo:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            memory: "2Gi"
+            cpu: "1"
+          requests:
+            memory: "256Mi"
+            cpu: "0.125"
+        tty: true
+        ports:
+        - containerPort: 6078
+          protocol: TCP

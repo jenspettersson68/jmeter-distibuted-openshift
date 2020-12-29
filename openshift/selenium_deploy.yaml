@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selenium-standalone
+  labels:
+    app: selenium-standalone
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: selenium-standalone
+  template:
+    metadata:
+      labels:
+        app: selenium-standalone
+    spec:
+      containers:
+      - name: standalone
+        image: docker-registry.default.svc:5000/sandbox-continuous-testing/standalone-chrome:prebeta-4.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 4444
+        - containerPort: 5900
+          protocol: TCP

@@ -1,0 +1,22 @@
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  labels:
+    build: influx-grafana-teardown
+  name: influx-grafana-teardown
+  namespace: ocp-pipelines-continuous-testing
+spec:
+  nodeSelector: {}
+  output: {}
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    git:
+      ref: master
+      uri: ssh://git@git.build.ingka.ikea.com/continuous-testing/jmeter-distributed-ocp.git
+    type: Git
+  strategy:
+    jenkinsPipelineStrategy:
+      jenkinsfilePath: config/influx_teardown_Jenkinsfile.groovy
+    type: JenkinsPipeline

@@ -1,0 +1,81 @@
+FROM registry.redhat.io/rhel7/rhel
+MAINTAINER jenspettersson
+		
+ENV JMETER_VERSION 5.3
+
+USER root
+
+# Install Packages
+
+ENV JAVA_VER 11
+ENV JAVA_HOME /usr/lib/jvm/java-$JAVA_VER
+
+ #Install Packages
+ 
+ENV JAVA_HOME /opt/jdk-$JAVA_VER/
+
+# Install Packages
+RUN yum update -y; \
+    yum install -y wget unzip curl vim python-setuptools sudo; \
+    easy_install supervisor
+RUN wget https://download.java.net/openjdk/jdk${JAVA_VER}/ri/openjdk-${JAVA_VER}+28_linux-x64_bin.tar.gz -O /opt/jdk.tar.gz
+
+RUN cd /opt; \
+    tar -xvf jdk.tar.gz; \
+    rm jdk.tar.gz
+
+RUN cd /opt/jdk-$JAVA_VER; \
+    alternatives --install /usr/bin/java java /opt/jdk-$JAVA_VER/bin/java 2
+RUN yum clean all
+
+#JMETER Installation
+
+#Creating the folder for storing test-cases, reports, logfiles etc
+
+RUN mkdir /jmeter \
+&& cd /jmeter/ \
+&& wget https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-$JMETER_VERSION.tgz \
+&& tar -xzf apache-jmeter-$JMETER_VERSION.tgz \
+&& rm apache-jmeter-$JMETER_VERSION.tgz
+
+#Plugin manager
+RUN cd /jmeter/apache-jmeter-$JMETER_VERSION/ && wget -q -O /tmp/JMeterPlugins-Standard-1.4.0.zip https://jmeter-plugins.org/downloads/file/JMeterPlugins-Standard-1.4.0.zip && unzip -n /tmp/JMeterPlugins-Standard-1.4.0.zip && rm /tmp/JMeterPlugins-Standard-1.4.0.zip
+
+#Webdriver plugin
+#RUN cd /jmeter/apache-jmeter-$JMETER_VERSION/ && wget -q -O /tmp/jpgc-webdriver-3.3.zip https://jmeter-plugins.org/files/packages/jpgc-webdriver-3.3.zip && unzip -n /tmp/jpgc-webdriver-3.3.zip && rm /tmp/jpgc-webdriver-3.3.zip
+
+#Custom thread groups
+RUN cd /jmeter/apache-jmeter-$JMETER_VERSION/ && wget -q -O /tmp/jpgc-casutg-2.9.zip https://jmeter-plugins.org/files/packages/jpgc-casutg-2.9.zip && unzip -n /tmp/jpgc-casutg-2.9.zip && rm /tmp/jpgc-casutg-2.9.zip
+
+#JMeter-InfluxDB-Writer
+RUN wget -q -O /jmeter/apache-jmeter-$JMETER_VERSION/lib/ext/JMeter-InfluxDB-Writer-plugin-1.2.jar https://github.com/NovatecConsulting/JMeter-InfluxDB-Writer/releases/download/v-1.2/JMeter-InfluxDB-Writer-plugin-1.2.jar
+
+#jmeter.pack-listener
+RUN cd /jmeter/apache-jmeter-$JMETER_VERSION/ && wget -q -O /tmp/jmeter.pack-listener-1.7.zip https://jmeter-plugins.org/files/packages/jmeter.pack-listener-1.7.zip && unzip -n /tmp/jmeter.pack-listener-1.7.zip && rm /tmp/jmeter.pack-listener-1.7.zip
+
+#Parallell testing plugin
+RUN cd /jmeter/apache-jmeter-$JMETER_VERSION/ && wget -q -O /tmp/bzm-parallel-0.7.zip https://jmeter-plugins.org/files/packages/bzm-parallel-0.7.zip && unzip -n /tmp/bzm-parallel-0.7.zip && rm /tmp/bzm-parallel-0.7.zip
+
+ENV JMETER_HOME /jmeter/apache-jmeter-$JMETER_VERSION/
+
+RUN touch $JMETER_HOME/bin/jmeter.log
+RUN touch $JMETER_HOME/bin/jmeter-server.log
+
+#Creating the folder for storing test-cases, reports, logfiles etc
+RUN mkdir /testdata
+
+RUN chgrp -R 0 /jmeter/ && \
+    chmod -R 777 /jmeter/
+
+RUN chgrp 0 $JMETER_HOME/bin/jmeter.log && \
+    chmod 777 $JMETER_HOME/bin/jmeter.log
+
+RUN chgrp 0 $JMETER_HOME/bin/jmeter-server.log && \
+    chmod 777 $JMETER_HOME/bin/jmeter-server.log
+
+RUN chgrp -R 0 /testdata && \
+    chmod -R goa+rwX /testdata
+	
+ENV PATH $JMETER_HOME/bin:$PATH
+
+#ENTRYPOINT /bin/bash

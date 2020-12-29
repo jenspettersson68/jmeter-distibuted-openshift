@@ -1,0 +1,15 @@
+FROM docker-registry.default.svc:5000/sandbox-continuous-testing/jmeter-base-ikea:latest
+# For local build from base image - FROM ikea/jmeter-base-ikea:latest
+# SET VARIABLE $PROJECT to your project!!
+MAINTAINER jens.pettersson
+
+ARG JMETER_VERSION=5.3
+		
+EXPOSE 1099 50000
+
+WORKDIR $JMETER_HOME/bin
+		
+ENTRYPOINT $JMETER_HOME/bin/jmeter-server \
+-Dserver.rmi.localport=50000 \
+-Dserver_port=1099 \
+-Jserver.rmi.ssl.disable=true
